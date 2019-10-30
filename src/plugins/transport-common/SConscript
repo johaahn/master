@@ -1,0 +1,63 @@
+#!/usr/bin/python
+Import('bs')
+
+
+sw_dict = {
+    'name':'plugin-transport-msgqueue',
+    'type':'library',
+    'sources': ['msgqueue.cc'],
+    'includes':['./'],
+    'defines':[],
+    'libs':{'shared':['boost','core'], 'static':['node','common-c','common-cpp']},
+    'install': []
+}
+bs.AddSW(sw_dict)
+
+sw_dict = {
+    'name':'plugin-transport-function',
+    'type':'library',
+    'sources': ['function.cc'],
+    'includes':['./'],
+    'defines':[],
+    'libs':{'shared':['core'], 'static':['node','common-c','common-cpp']},
+    'install': []
+}
+
+bs.AddSW(sw_dict)
+
+sw_dict = {
+    'name':'plugin-transport-tcp',
+    'type':'library',
+    'sources': ['tcp.cc'],
+    'includes':['./','#src/plugins/'],
+    'defines':[],
+    'libs':{'shared':['core','boost'], 'static':['node','common-c','common-cpp']},
+    'install': [],
+    'api': 'api.hh'
+}
+
+bs.AddSW(sw_dict)
+
+sw_dict = {
+    'name':'plugin-transport-udp',
+    'type':'library',
+    'sources': ['udp.cc'],
+    'includes':['./'],
+    'defines':[],
+    'libs':{'shared':['core','boost'], 'static':['node','common-c','common-cpp']},
+    'install': []
+}
+
+bs.AddSW(sw_dict)
+
+sw_dict = {
+    'name':'plugin-transport-serial',
+    'type':'program',
+    'sources': ['main.cc'],
+    'includes':['./'],
+    'defines':[],
+    'libs':{'shared':['core','boost','plugin-transport-udp'], 'static':['node','common-c','common-cpp']},
+    'install': []
+}
+
+bs.AddSW(sw_dict)

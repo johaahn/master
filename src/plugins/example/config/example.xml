@@ -1,0 +1,55 @@
+
+<master>
+	<node>
+	<type>test1</type>
+	<ports>
+		<port>
+			<name>port1</name>
+			<url>
+				<tx>func://func1</tx>
+			</url>
+		</port>
+		<port>
+			<name>port2</name>
+			<url>
+				<rx>msg://msg1</rx>
+			</url>
+		</port>
+		<port>
+			<name>port3</name>
+			<url>
+  			tcp://127.0.0.1:50100
+			</url>
+		</port>
+	</ports>
+	<settings>
+		<config1>1</config1>
+	</settings>
+</node>
+<node>
+<type>test2</type>
+<ports>
+	<port>
+		<name>port1</name>
+		<url>
+			<rx>func://func1</rx>
+		</url>
+	</port>
+	<port>
+		<name>port2</name>
+		<url>
+			<tx>msg://msg1</tx>
+		</url>
+	</port>
+	<port>
+		<name>port3</name>
+		<url>
+				tcp://server:50100
+		</url>
+	</port>
+</ports>
+<settings>
+	<config2>2</config2>
+</settings>
+</node>
+</master>

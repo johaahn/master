@@ -1,0 +1,21 @@
+#!/usr/bin/python
+Import('bs')
+
+
+bs.env.Uic('main_window.ui')
+bs.env.Uic('form_task.ui')
+
+ # QT resource File
+bs.env.Qrc('qrc_qt.cpp','qt.qrc')
+
+sw_dict = {
+	'name':'host-qt',
+	'type':'library',
+	'sources':['*.cpp'],
+	'includes':['./'],
+	'defines':{},
+	'libs':{'shared':['qt-propertybrowser','host-qt-nogui','qt','core'], 'static':['node','common-c','common-cpp']},
+	'install': []
+}
+
+bs.AddSW(sw_dict)

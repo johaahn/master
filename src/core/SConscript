@@ -1,0 +1,18 @@
+#!/usr/bin/python
+Import('bs')
+
+#TODO: remove boost DEPENDANCE...
+
+sw_dict = {
+	'name':'core',
+	'type':'library',
+	'sources':['*.cc','*.c'],
+	'includes':['./','#src/plugins'],
+	'defines':[''],
+	'libs':{'shared':['boost','bml-sab','rt'], 'static':['node','common-c','common-cpp']},
+	'install': []
+}
+if bs['config'] in ['sadc', 'bfu-recorder']:
+	sw_dict['defines'].append('LF_LIC_ALWAYSTRUE')
+
+bs.AddSW(sw_dict)

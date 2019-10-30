@@ -1,0 +1,15 @@
+#!/usr/bin/python
+Import('bs')
+
+ 
+sw_dict = {
+	'name':'host-qt-nogui',
+	'type':'library',
+	'sources':'*.cpp',
+	'includes':['./'],
+	'defines':['SUPERDEFINE'],
+	'libs':{'shared':['qt','core'], 'static':['node','common-c','common-cpp']},
+	'install': []
+}
+
+bs.AddSW(sw_dict)

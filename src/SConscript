@@ -1,0 +1,20 @@
+#!/usr/bin/python
+Import('bs')
+
+sw_dict = {
+    'name':'master',
+    'type':'program',
+    'sources':'*.cc',
+    'includes':['./'],
+    'defines':[],
+    'install': [
+	{'source':bs.env_run['ENV']['MASTER_CONFIG'] , 'target':'usr/share/master'},
+	],
+	#'deb' : {'depends':'libboost-thread1.46.1,libboost-system1.46.1,libboost-filesystem1.46.1,libcrypto++9,libopenal1,libasound2', 'description': bs['config']},
+	'deb' : {'depends':bs.env_run['ENV']['MASTER_DEPENDS'], 'description': bs['config']},
+}
+sw_dict['libs'] = bs.env_run['MASTER_LIBS']
+sw_dict['modules'] = bs.env_run['MASTER_MODULES']
+sw_dict['defines'] = bs.env_run['MASTER_DEFINES']
+
+bs.AddSW(sw_dict)

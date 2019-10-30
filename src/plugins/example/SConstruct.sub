@@ -1,0 +1,25 @@
+Import('bs')
+import os
+
+if not bs.init:
+################################################################################
+#### LIBRARIES
+################################################################################
+  if bs['config'] == 'example':
+    bs.env_run['MASTER_LIBS']['module'].append('plugin-test1')
+    bs.env_run['MASTER_LIBS']['module'].append('plugin-test2')
+
+
+################################################################################
+#### FOLDERS
+################################################################################
+
+  if bs['config'] == 'example':
+    bs.env_run['MASTER_DIRS'].append('src/plugins/example/')
+
+################################################################################
+#### CONFIGURATION FILE
+################################################################################
+
+  if bs['config'] == 'example':
+      bs.env_run['ENV']['MASTER_CONFIG'] = os.path.abspath('config/example.xml');

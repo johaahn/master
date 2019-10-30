@@ -1,0 +1,15 @@
+#!/usr/bin/python
+Import('bs')
+
+ 
+sw_dict = {
+    'name':'host-boost',
+    'type':'library',
+    'sources':'*.cc',
+    'includes':['./'],
+    'defines':['SUPERDEFINE'],
+    'libs':{'shared':['boost','core','dl'], 'static':['node','common-c']},
+    'install': []
+}
+
+bs.AddSW(sw_dict)

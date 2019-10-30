@@ -1,0 +1,29 @@
+#!/usr/bin/python
+Import('bs')
+
+
+sw_dict = {
+    'name':'plugin-test1',
+    'type':'library',
+    'sources': ['test1.cc'],
+    'includes':['./', '#src/plugins'],
+    'defines':[],
+    'libs':{'shared':['boost','core'], 'static':['node','common-c','common-cpp'] , 'module':['plugin-test2']},
+    'install': [],
+    'api':'event_test1.hh'
+}
+
+bs.AddSW(sw_dict)
+
+sw_dict = {
+    'name':'plugin-test2',
+    'type':'library',
+    'sources': ['test2.cc'],
+    'includes':['./', '#src/plugins'],
+    'defines':[],
+    'libs':{'shared':['boost','core'], 'static':['node','common-c','common-cpp'] , 'module':['plugin-test1']},
+    'install': [],
+    'api':'event_test2.hh'
+}
+
+bs.AddSW(sw_dict)

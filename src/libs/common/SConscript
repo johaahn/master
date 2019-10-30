@@ -1,0 +1,43 @@
+#!/usr/bin/python
+Import('bs')
+
+
+sw_dict = {
+	'name':'common-c',
+	'type':'library',
+	'sources':'c/*.c',
+	'includes':['./'],
+	'libs':{'shared':[], 'static':[]},
+}
+
+bs.AddSW(sw_dict)
+
+sw_dict = {
+    'name':'common-cpp',
+    'type':'library',
+    'sources':'cpp/*.cc',
+    'includes':['./'],
+    'libs':{'shared':['bfd','boost'], 'static':[]},
+}
+
+bs.AddSW(sw_dict)
+
+sw_dict = {
+    'name':'common-math',
+    'type':'library',
+    'sources':'math/*.cc',
+    'includes':['./'],
+    'libs':{'shared':['common-cpp', 'eigen'], 'static':[]},
+}
+
+bs.AddSW(sw_dict)
+
+sw_dict = {
+    'name':'common-gpu',
+    'type':'library',
+    'sources':'cpp/*.cu',
+    'includes':['./'],
+    'libs':{'shared':[], 'static':[]},
+}
+
+bs.AddSW(sw_dict)
