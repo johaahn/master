@@ -186,6 +186,9 @@ public:
 	/* Add method */
 	CT_GUARD<CT_PORT_NODE> add(uint32_t const & in_id);
 
+	/* Add display method */
+	void display(int i_shift=0);
+
 	/* Set data overload */
 	template<typename T2> void set_data(T2 const & in) {
 		bml::node<uint32_t, CT_GUARD>::set_data(in);

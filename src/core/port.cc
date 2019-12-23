@@ -220,6 +220,40 @@ CT_GUARD<CT_PORT_NODE> CT_PORT_NODE::add(uint32_t const & in_id) {
 	//return dynamic_cast<CT_PORT_NODE&>(*(node<uint32_t,CT_GUARD>::add(in_id)));
 }
 
+void CT_PORT_NODE::display(int i_shift) {
+
+	std::string str_indent(i_shift*2, ' ');
+
+	std::string str_name = CT_HOST::host->f_id_name(this->get_id());
+	size_t sz_pos = str_name.find_last_of("::");
+	size_t sz_str = str_name.substr(sz_pos+1).size();
+
+	size_t sz_allign = 1000 - sz_str - i_shift*2;
+	sz_allign = sz_allign % 40;
+	std::string str_allign(sz_allign, ' ');
+  if(this->get_size() == 4){
+    _DBG << str_indent  <<  str_name.substr(sz_pos+1) << /* " ("  << std::uppercase  << std::hex << this->get_id() << ") "  << */ str_allign <<  "    SIZE:" << this->get_size()<<"  uint32_t:"<<std::setw(20)<<this->get_data<uint32_t>()<<"   int32_t:" << std::setw(20)<<this->get_data<int32_t>()<<"   float:"<<this->get_data<float>();
+  }
+  else if(this->get_size() == 2){
+    _DBG << str_indent  <<  str_name.substr(sz_pos+1) << /* " ("  << std::uppercase  << std::hex << this->get_id() << ") "  << */ str_allign <<  "    SIZE:" << this->get_size()<<"  uint16_t:"<<std::setw(20)<<this->get_data<uint16_t>()<<"   int16_t:"<< std::setw(20)<<this->get_data<int16_t>();
+  }
+  else if(this->get_size() == 8){
+    _DBG << str_indent  <<  str_name.substr(sz_pos+1) << /* " ("  << std::uppercase  << std::hex << this->get_id() << ") "  << */ str_allign <<  "    SIZE:" << this->get_size()<<"  uint64_t:"<<std::setw(20)<<this->get_data<uint64_t>()<<"   int64_t:"<< std::setw(20)<<this->get_data<int64_t>()<<"   double:"<<this->get_data<double>();
+  }
+  else if(this->get_size() == 1){
+    _DBG << str_indent  <<  str_name.substr(sz_pos+1) << /* " ("  << std::uppercase  << std::hex << this->get_id() << ") "  << */ str_allign <<  "    SIZE:" << this->get_size()<<"  uint8_t :" <<std::setw(20)<<(uint16_t)this->get_data<uint8_t>() <<"   char:"  <<this->get_data<char>();
+  }
+  else{
+    _DBG << str_indent  <<  str_name.substr(sz_pos+1) << /* " ("  << std::uppercase  << std::hex << this->get_id() << ") "  << */ str_allign <<  "    SIZE:" << this->get_size();
+  }
+
+	for(auto && rc_child : this->get_childs()) {
+
+		rc_child->display(i_shift+1);
+
+	}
+}
+
 template<>
 void CT_PORT_NODE::set_data<>(std::string const & in) {
 	size_t sz_str = in.size();

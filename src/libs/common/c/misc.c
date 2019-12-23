@@ -12,9 +12,11 @@
 /* Stats*/
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/statvfs.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <sys/wait.h>
 
 uint64_t f_get_time_ns64(void) {
   int ec;
@@ -246,16 +248,49 @@ int f_misc_folder_exists (const char * in_str_folder) {
   }
 }
 
+float f_misc_get_cpu_load(void){
+  char buffer_load_cpu[5]; // return load cpu since 1 minutes
+  float f_load = 0.0;
+  int ec = f_file_dump("/proc/loadavg",buffer_load_cpu,(size_t)5);
+  if (ec != EC_SUCCESS) {
+     fprintf(stderr, "error reading /proc/loadavg\n");
+     f_load = 0.0/0.0;
+  }else{
+    f_load = atof(buffer_load_cpu);
+  }
+  //printf("\n Valeur lu dans :: </proc/loadavg> == %f \n",f_load );
+  return f_load;
+}
+
+size_t f_misc_get_remaining_space(const char * ac_folder){
+  /* Remaining size of folder */
+  size_t sz_remaining;
+  //if (ac_folder) {
+  struct stat buffer;
+  if(stat (ac_folder, &buffer) == 0){
+    struct statvfs s_stat;
+    statvfs(ac_folder, &s_stat);
+    sz_remaining = s_stat.f_bsize * s_stat.f_bavail;
+  } else {
+    sz_remaining = 0;
+  }
+  return sz_remaining;
+}
+
 pid_t f_misc_popen2(const char *command, int *infp, int *outfp)
 {
     int p_stdin[2];
     int p_stdout[2];
+    int p_stderr[2];
     pid_t pid;
 
     if (pipe(p_stdin) != 0)
         return -1;
 
     if (pipe(p_stdout) != 0)
+        return -1;
+
+    if (pipe(p_stderr) != 0)
         return -1;
 
     pid = fork();
@@ -272,6 +307,8 @@ pid_t f_misc_popen2(const char *command, int *infp, int *outfp)
         /* DO NOT PERFORM DEBUG PRINTF FROM HERE */
         close(p_stdout[0]);
         dup2(p_stdout[1], STDOUT_FILENO);
+        close(p_stderr[0]);
+        dup2(p_stderr[1], STDERR_FILENO);
         const char * ac_argv[4] ={"sh", "-c", command, (char *)NULL};
         execve("/bin/sh", (char * const *) ac_argv, NULL);
         /* We should never reach this point */
@@ -279,6 +316,7 @@ pid_t f_misc_popen2(const char *command, int *infp, int *outfp)
         exit(1);
     } else {
         close(p_stdout[1]);
+        close(p_stderr[1]);
         close(p_stdin[0]);
     }
 
@@ -291,6 +329,8 @@ pid_t f_misc_popen2(const char *command, int *infp, int *outfp)
         close(p_stdout[0]);
     else
         *outfp = p_stdout[0];
+
+    close(p_stderr[0]);
 
     return pid;
 }
@@ -306,4 +346,99 @@ int f_misc_check_env_i(const char * in_str_varenv, uint32_t const i_default_valu
     WARN("Variable d'environnement %s non trouvée", in_str_varenv);
   }
   return i_tmp;
+}
+
+
+
+
+
+int f_misc_execute(/*std::string const &*/const char * in_str_cmd, int8_t in_b_display) {
+    char buff[512];
+    int ec_code = -1;
+//#define LF_DEBUG_EXECUTE
+#if 0
+    //_DBG << "Execute: "<< in_str_cmd;
+    printf("Execute: %s\n",in_str_cmd);
+    in_b_display = 1;
+#endif
+
+    {
+      pid_t i_pid;
+      int i_out;
+      uint64_t i_time_start = f_get_time_ns64();
+      strncpy(buff, in_str_cmd, sizeof(buff));
+
+      i_pid = f_misc_popen2(buff, NULL, &i_out);
+      if (i_pid < 0) {
+    	  return -1;
+      }
+      int8_t b_process_running = 1;
+      while (b_process_running) {
+        fd_set rfds;
+        FD_ZERO(&rfds);
+        FD_SET(i_out, &rfds);
+        struct timeval tv = {0, 100000};
+        int retval = select(i_out + 1, &rfds, NULL, NULL, &tv);
+        if (retval > 0) {
+          ssize_t i_count = read(i_out, buff, sizeof(buff));
+          if (i_count == -1) {
+            if (errno == EINTR) {
+              continue;
+            } else {
+              perror("read");
+              exit(1);
+            }
+          } else if (i_count == 0) {
+
+          } else {
+
+            if(in_b_display) {
+              /* Display output */
+              printf("RAW OUTPUT START---\n");
+              int i;
+              for(i=0; i<i_count; i++) {
+                if(buff[i] != 0) {
+                  printf("%c",buff[i]);
+                }
+              }
+              printf("RAW OUTPUT END----\n");
+            }
+
+          }
+        }
+        {
+          uint64_t i_timeout = f_get_time_ns64() - i_time_start;
+          if( (retval != 0)  || (i_timeout > 1e9) ) {
+
+            int i_status = 0;
+            int ec_waitpid = waitpid(i_pid, &i_status, WNOHANG);
+            /* If pid has changed state */
+            if(ec_waitpid > 0) {
+              if(WIFEXITED(i_status)) {
+                ec_code = WEXITSTATUS(i_status);
+                b_process_running = 0;
+              }
+            /* If pid has not changed state */
+            } else if (ec_waitpid == 0) {
+              /* Kill process after timeout */
+              if(i_timeout > 5e9) {
+                //_WARN << "TIMEOUT - KILL PID" << _V(i_pid);
+                printf("TIMEOUT - KILL PID %ld\n", (long int)(i_pid));
+                kill(i_pid, SIGKILL);
+              }
+            /* If pid is not here any more */
+            } else {
+              //_DBG << "Pid does not exit" << _V(i_pid);
+              printf("Pid does not exit %ld\n", (long int)(i_pid));
+              b_process_running = 0;
+            }
+          }
+        }
+      }
+
+      /* Close stdout */
+      close(i_out);
+      /* Wait this process to end */
+    }
+    return ec_code;
 }

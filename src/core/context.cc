@@ -118,7 +118,7 @@ int CT_HOST_CONTEXT::f_execute_single(void) {
 	ec = _c_cb(*this);
 #ifdef LF_ABORT_SHIELD
 } catch (const std::exception & e) {
-	_CRIT << "EXCEPTION: " << e.what();
+	_FATAL << "EXCEPTION: " << e.what(); // uniquement en debug 
 	//exit(-1);
 	ec = EC_SUCCESS;
 }

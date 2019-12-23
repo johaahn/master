@@ -44,6 +44,8 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+std::string gstr_none("NONE");
+
 CT_MUTEX gc_mutex_fftw;
 //M_CONTEXT_CREATE_CB(f_main_cb, CT_HOST, f_run);
 
@@ -91,6 +93,14 @@ CT_HOST::CT_HOST(struct ST_HOST_ARGS * in_ps_args) {
 		_str_plugin_path = str_paths;
 	}
 
+  {
+    char * str_paths = getenv("TMP");
+    _DBG << "TMP_PATH: "<<str_paths;
+    if (!str_paths) {
+      str_paths = (char*) "/tmp";
+    }
+    _str_tmp_path = str_paths;
+  }
 
  {
   char * str_db_path = getenv("IDS_DB_PATH");
@@ -893,7 +903,8 @@ std::string const & CT_HOST::f_id_name(uint32_t in_i_id) {
  if(pc_it != _m_id_db.end()) {
   return pc_it->second;
  } else {
-  throw  _FATAL << "ID "<< std::hex << in_i_id << " does not exists";
+  _CRIT << "ID "<< std::hex << in_i_id << " does not exists";
+  return gstr_none;
  }
 }
 

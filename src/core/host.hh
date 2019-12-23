@@ -435,6 +435,12 @@ class CT_HOST : public CT_HOST_CONTEXT {
 	 */
 	std::string _str_plugin_path;
 
+  /*!
+	 *  Temporqry folder.
+	 *  Location of temporary folder
+	 */
+	std::string _str_tmp_path;
+
 	/*!
 	 *  Home folder.
 	 *  Absolute path of user home.
@@ -962,6 +968,13 @@ public:
 	 * @return absolute file path of plugin directory
 	 */
 	std::string const f_get_plugin_path() { return _str_plugin_path; }
+
+  /*!
+	 * Get tmp location.
+	 *
+	 * @return absolute file path of plugin directory
+	 */
+	std::string const f_get_tmp_path() { return _str_tmp_path; }
 
   /*!
    * Get host structure arguments.
