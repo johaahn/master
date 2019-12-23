@@ -89,7 +89,7 @@ def Action_check_rules(target, source, env):
   #print(target)
   error=0
   for x in source:
-      rls = rules_checker.rules_checker(str(x), rules=env['RULES'])
+      rls = rules_checker.rules_checker(str(x), rules=env['RULES'], debug_mode=env['RULES'])
       error += rls.error
   if error and fatalerror:
     return -1

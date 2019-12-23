@@ -40,7 +40,7 @@ rules_list = [
     'prefix':'str'
     },
     {
-    'identifiers':['vector'],
+    'identifiers':['vector', 'ct_shared_vector'],
     'prefix':'v'
     },
     {
@@ -246,6 +246,12 @@ class rules_checker:
         #self.check_prefix(var_name, type_prefix+type_suffix+'_')
 
 
+    def check_ref_used(self, str_suffix, lineno_):
+        
+        if (str_suffix[0] == 'c') or ((str_suffix[0] == 's') and (not (str_suffix[1] == 'z'))) or (str_suffix[0] == 'l') or (str_suffix[0] == 'v') or (str_suffix[0] == 'm'):
+            print(colored("WARNING ",'yellow') + " reference should be used (file:%s, line:%d, prefix:%s)"%(self.filename, lineno_, str_suffix))
+
+
     def parse_var(self, s, loc, tokens, func_mode=False):
         if "var" in self.debug:
             print("VAR",tokens, self.mode, self.level, func_mode)
@@ -272,11 +278,16 @@ class rules_checker:
             #print(type_list)
             for typet_ in type_list:
                 type_ = str(typet_).lower()
+                b_found = False
                 for rule in rules_list:
                     if type_ in rule['identifiers']:
                         type_suffix = rule['prefix']
+                        b_found = True
 
-                if type_ == '*':
+                if b_found:
+                    # Nothing to do
+                    b_found = False
+                elif type_ == '*':
                     type_suffix = 'p' + type_suffix
                     type_external = True
                 elif type_ == '&':
@@ -285,6 +296,8 @@ class rules_checker:
                 elif type_ == ("CT_GUARD").lower():
                     type_suffix = 'p'
                     type_external = True
+                elif type_ == ("CT_PORT_NODE_GUARD").lower():
+                    type_suffix = 'pc'
                 elif type_ == 'const':
                     type_const = True
                 elif type_ == 'struct' or type_.startswith("st_"):
@@ -337,8 +350,12 @@ class rules_checker:
                         else:
                             prefix_list.append("inout_"+type_prefix+suffix+'_')
                             prefix_list.append("out_"+type_prefix+suffix+'_')
+                                                
                     else:
                         prefix_list.append("in_"+type_prefix+suffix+'_')
+                        
+                        self.check_ref_used(type_prefix+suffix+'_', lineno(loc, s))
+                                                
                 else:
                     if self.mode[-1] == "CLASS" and self.class_mode == "private":
                         prefix_list.append('_'+type_prefix+suffix+'_')
